@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Training Tracker" />
+  <meta name="theme-color" content="#101010" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Training Tracker</title>
+  <style>
+    :root {
+      --bg: #f5f1ea;
+      --card: rgba(255,255,255,0.78);
+      --card-strong: #ffffff;
+      --text: #1d1b18;
+      --muted: #6d675f;
+      --line: rgba(29,27,24,0.12);
+      --accent: #111111;
+      --accent-soft: #e7ded0;
+      --success: #2d6a4f;
+      --danger: #a33a2b;
+      --shadow: 0 18px 50px rgba(30, 24, 16, .10);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% -10%, #fff9ef 0 24%, transparent 42%),
+        radial-gradient(circle at 110% 0%, #ded0bd 0 18%, transparent 38%),
+        linear-gradient(180deg, #f9f4ec 0%, var(--bg) 42%, #ece4da 100%);
+      padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .app {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      padding: 22px 4px 12px;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 9vw, 54px);
+      line-height: .92;
+      letter-spacing: -0.055em;
+    }
+
+    .subline {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.45;
+      max-width: 560px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin: 16px 0;
+    }
+
+    .big-card {
+      background: rgba(17,17,17,.96);
+      color: white;
+      border-radius: 30px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+    }
+
+    .big-card:after {
+      content: "";
+      position: absolute;
+      width: 210px;
+      height: 210px;
+      right: -80px;
+      top: -60px;
+      background: radial-gradient(circle, rgba(255,255,255,.18), transparent 66%);
+      border-radius: 50%;
+    }
+
+    .big-label {
+      margin: 0;
+      font-size: 15px;
+      opacity: .72;
+      font-weight: 650;
+    }
+
+    .big-number {
+      font-size: clamp(72px, 26vw, 128px);
+      line-height: .84;
+      letter-spacing: -.08em;
+      font-weight: 860;
+      margin: 14px 0 10px;
+    }
+
+    .big-note {
+      margin: 0;
+      color: rgba(255,255,255,.78);
+      font-size: 16px;
+      line-height: 1.35;
+      max-width: 410px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .stat {
+      background: var(--card);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      border-radius: var(--radius);
+      padding: 16px;
+      min-height: 110px;
+      box-shadow: 0 10px 26px rgba(30,24,16,.05);
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 38px;
+      line-height: 1;
+      letter-spacing: -.05em;
+      font-weight: 820;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 650;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(30,24,16,.06);
+      backdrop-filter: blur(18px);
+      margin: 14px 0;
+    }
+
+    .card h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      letter-spacing: -.02em;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      margin: 12px 0 7px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      font: inherit;
+      color: var(--text);
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.85);
+      border-radius: 16px;
+      padding: 14px 14px;
+      outline: none;
+    }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(17,17,17,.45);
+      box-shadow: 0 0 0 4px rgba(17,17,17,.07);
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button, .file-label {
+      appearance: none;
+      border: 0;
+      border-radius: 18px;
+      background: var(--accent);
+      color: white;
+      font: inherit;
+      font-weight: 780;
+      padding: 15px 16px;
+      cursor: pointer;
+      text-align: center;
+      min-height: 52px;
+      touch-action: manipulation;
+    }
+
+    button.secondary, .file-label.secondary {
+      background: var(--accent-soft);
+      color: var(--text);
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--line);
+    }
+
+    button.danger {
+      background: #f3ddd8;
+      color: var(--danger);
+    }
+
+    button:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+      background: rgba(255,255,255,.55);
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 999px;
+      transition: width .3s ease;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .empty {
+      color: var(--muted);
+      background: rgba(255,255,255,.5);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      line-height: 1.4;
+    }
+
+    .item {
+      background: rgba(255,255,255,.78);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .item-title {
+      font-weight: 780;
+      margin: 0 0 4px;
+    }
+
+    .item-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      margin: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 780;
+      background: var(--accent-soft);
+      color: var(--text);
+      margin-top: 8px;
+    }
+
+    .pill.good { background: #d9eadf; color: var(--success); }
+    .pill.redeemed { background: #eee8df; color: var(--muted); }
+
+    .small-btn {
+      min-height: 38px;
+      padding: 8px 11px;
+      border-radius: 12px;
+      font-size: 13px;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--muted);
+    }
+
+    .hint {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .toast {
+      position: fixed;
+      left: 16px;
+      right: 16px;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      max-width: 520px;
+      margin: 0 auto;
+      background: rgba(17,17,17,.94);
+      color: white;
+      border-radius: 18px;
+      padding: 14px 16px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.25);
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: all .22s ease;
+      font-weight: 700;
+      z-index: 10;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .top-actions button {
+      min-height: 38px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    .hidden-input { display: none; }
+
+    @media (min-width: 680px) {
+      body { padding-left: 24px; padding-right: 24px; }
+      .hero { grid-template-columns: 1.2fr .8fr; align-items: stretch; }
+      .grid { margin: 0; }
+      .actions { grid-template-columns: 1fr 1fr; }
+      .wide { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <p class="eyebrow">Karate · Training Tracker</p>
+      <h1>Training<br>Guthaben</h1>
+      <p class="subline">Tracke, wann du ein Training gibst. Nach 2 gegebenen Trainings erhältst du 1 kostenloses Privattraining.</p>
+      <div class="top-actions">
+        <button class="secondary" id="exportBtn" type="button">Backup exportieren</button>
+        <label class="file-label secondary" for="importFile">Backup importieren</label>
+        <input class="hidden-input" id="importFile" type="file" accept="application/json,.json" />
+      </div>
+    </header>
+
+    <section class="hero" aria-label="Übersicht">
+      <div class="big-card">
+        <p class="big-label">Offene Privattrainings</p>
+        <div class="big-number" id="availableCredits">0</div>
+        <p class="big-note" id="mainNote">Du hast aktuell kein offenes Guthaben.</p>
+      </div>
+
+      <div class="grid">
+        <div class="stat">
+          <span class="stat-number" id="trainingCount">0</span>
+          <span class="stat-label">Trainings gegeben</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="earnedCredits">0</span>
+          <span class="stat-label">Guthaben verdient</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="redeemedCredits">0</span>
+          <span class="stat-label">Privattrainings eingelöst</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="nextProgress">0/2</span>
+          <span class="stat-label">Fortschritt zum nächsten Guthaben</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Fortschritt">
+      <h2>Nächstes Guthaben</h2>
+      <p class="hint" id="progressText">Gib 2 Trainings, um 1 Privattraining zu erhalten.</p>
+      <div class="progress-wrap" aria-hidden="true"><div class="progress" id="progressBar"></div></div>
+    </section>
+
+    <section class="card" aria-label="Training erfassen">
+      <h2>Training erfassen</h2>
+      <form id="trainingForm">
+        <div class="row">
+          <div>
+            <label for="trainingDate">Datum</label>
+            <input id="trainingDate" type="date" required />
+          </div>
+          <div>
+            <label for="trainingAmount">Anzahl</label>
+            <select id="trainingAmount">
+              <option value="1">1 Training</option>
+              <option value="2">2 Trainings</option>
+              <option value="3">3 Trainings</option>
+              <option value="4">4 Trainings</option>
+            </select>
+          </div>
+        </div>
+        <label for="trainingNote">Notiz optional</label>
+        <textarea id="trainingNote" placeholder="z.B. Kindertraining, Aushilfe, Thema..."></textarea>
+        <div class="actions">
+          <button type="submit">Training speichern</button>
+          <button type="button" class="secondary" id="quickAddBtn">Heute +1</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card" aria-label="Privattraining einlösen">
+      <h2>Privattraining einlösen</h2>
+      <form id="redeemForm">
+        <label for="redeemDate">Datum</label>
+        <input id="redeemDate" type="date" required />
+        <label for="redeemNote">Notiz optional</label>
+        <textarea id="redeemNote" placeholder="z.B. Privatlektion mit Sensei, Fokus Technik..."></textarea>
+        <div class="actions">
+          <button type="submit" id="redeemBtn">1 Guthaben einlösen</button>
+          <button type="button" class="ghost" id="undoLastRedeemBtn">Letzte Einlösung löschen</button>
+        </div>
+        <p class="hint">Einlösen ist nur möglich, wenn du mindestens 1 offenes Guthaben hast.</p>
+      </form>
+    </section>
+
+    <section class="card" aria-label="Verlauf Trainings">
+      <h2>Gegebene Trainings</h2>
+      <div class="list" id="trainingList"></div>
+    </section>
+
+    <section class="card" aria-label="Verlauf Einlösungen">
+      <h2>Eingelöste Privattrainings</h2>
+      <div class="list" id="redeemList"></div>
+    </section>
+
+    <section class="card" aria-label="Einstellungen">
+      <h2>Einstellungen</h2>
+      <p class="hint">Die Daten werden lokal auf diesem Gerät in deinem Browser gespeichert. Nutze ab und zu den Backup-Export, damit nichts verloren geht.</p>
+      <div class="actions">
+        <button type="button" class="danger" id="resetBtn">Alles löschen</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const STORAGE_KEY = 'karateTrainingTracker.v1';
+
+    const state = loadState();
+
+    const el = {
+      availableCredits: document.getElementById('availableCredits'),
+      mainNote: document.getElementById('mainNote'),
+      trainingCount: document.getElementById('trainingCount'),
+      earnedCredits: document.getElementById('earnedCredits'),
+      redeemedCredits: document.getElementById('redeemedCredits'),
+      nextProgress: document.getElementById('nextProgress'),
+      progressText: document.getElementById('progressText'),
+      progressBar: document.getElementById('progressBar'),
+      trainingForm: document.getElementById('trainingForm'),
+      trainingDate: document.getElementById('trainingDate'),
+      trainingAmount: document.getElementById('trainingAmount'),
+      trainingNote: document.getElementById('trainingNote'),
+      quickAddBtn: document.getElementById('quickAddBtn'),
+      redeemForm: document.getElementById('redeemForm'),
+      redeemDate: document.getElementById('redeemDate'),
+      redeemNote: document.getElementById('redeemNote'),
+      redeemBtn: document.getElementById('redeemBtn'),
+      undoLastRedeemBtn: document.getElementById('undoLastRedeemBtn'),
+      trainingList: document.getElementById('trainingList'),
+      redeemList: document.getElementById('redeemList'),
+      exportBtn: document.getElementById('exportBtn'),
+      importFile: document.getElementById('importFile'),
+      resetBtn: document.getElementById('resetBtn'),
+      toast: document.getElementById('toast')
+    };
+
+    init();
+
+    function init() {
+      const today = todayISO();
+      el.trainingDate.value = today;
+      el.redeemDate.value = today;
+      render();
+      bindEvents();
+      registerServiceWorker();
+    }
+
+    function bindEvents() {
+      el.trainingForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        addTraining(Number(el.trainingAmount.value), el.trainingDate.value, el.trainingNote.value.trim());
+        el.trainingNote.value = '';
+        el.trainingAmount.value = '1';
+      });
+
+      el.quickAddBtn.addEventListener('click', () => {
+        addTraining(1, todayISO(), '');
+      });
+
+      el.redeemForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const summary = calculateSummary();
+        if (summary.available <= 0) {
+          showToast('Du hast aktuell kein offenes Guthaben.');
+          return;
+        }
+        state.redemptions.push({
+          id: cryptoId(),
+          date: el.redeemDate.value || todayISO(),
+          note: el.redeemNote.value.trim(),
+          createdAt: new Date().toISOString()
+        });
+        el.redeemNote.value = '';
+        saveAndRender('Privattraining als eingelöst markiert.');
+      });
+
+      el.undoLastRedeemBtn.addEventListener('click', () => {
+        if (!state.redemptions.length) {
+          showToast('Es gibt noch keine Einlösung zum Löschen.');
+          return;
+        }
+        const newest = [...state.redemptions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+        state.redemptions = state.redemptions.filter(item => item.id !== newest.id);
+        saveAndRender('Letzte Einlösung gelöscht.');
+      });
+
+      el.exportBtn.addEventListener('click', exportBackup);
+      el.importFile.addEventListener('change', importBackup);
+
+      el.resetBtn.addEventListener('click', () => {
+        const ok = confirm('Wirklich alle Trainings und Einlösungen löschen?');
+        if (!ok) return;
+        state.trainings = [];
+        state.redemptions = [];
+        saveAndRender('Alle Daten gelöscht.');
+      });
+    }
+
+    function addTraining(amount, date, note) {
+      if (!date) date = todayISO();
+      if (!Number.isFinite(amount) || amount < 1) amount = 1;
+      state.trainings.push({
+        id: cryptoId(),
+        date,
+        amount,
+        note,
+        createdAt: new Date().toISOString()
+      });
+      const text = amount === 1 ? 'Training gespeichert.' : amount + ' Trainings gespeichert.';
+      saveAndRender(text);
+    }
+
+    function calculateSummary() {
+      const given = state.trainings.reduce((sum, item) => sum + Number(item.amount || 1), 0);
+      const earned = Math.floor(given / 2);
+      const redeemed = state.redemptions.length;
+      const available = Math.max(earned - redeemed, 0);
+      const progress = given % 2;
+      const missing = progress === 0 ? 2 : 1;
+      return { given, earned, redeemed, available, progress, missing };
+    }
+
+    function render() {
+      const summary = calculateSummary();
+      el.availableCredits.textContent = summary.available;
+      el.trainingCount.textContent = summary.given;
+      el.earnedCredits.textContent = summary.earned;
+      el.redeemedCredits.textContent = summary.redeemed;
+      el.nextProgress.textContent = summary.progress + '/2';
+      el.progressBar.style.width = (summary.progress / 2 * 100) + '%';
+      el.redeemBtn.disabled = summary.available <= 0;
+
+      if (summary.available === 1) {
+        el.mainNote.textContent = 'Du kannst 1 kostenloses Privattraining einlösen.';
+      } else if (summary.available > 1) {
+        el.mainNote.textContent = 'Du kannst ' + summary.available + ' kostenlose Privattrainings einlösen.';
+      } else {
+        el.mainNote.textContent = 'Du hast aktuell kein offenes Guthaben.';
+      }
+
+      if (summary.progress === 0) {
+        el.progressText.textContent = 'Starte die nächste Runde: Noch 2 Trainings bis zum nächsten Guthaben.';
+      } else {
+        el.progressText.textContent = 'Noch 1 Training, dann erhältst du wieder 1 Privattraining.';
+      }
+
+      renderTrainingList();
+      renderRedeemList();
+    }
+
+    function renderTrainingList() {
+      const items = [...state.trainings].sort((a, b) => sortByDateDesc(a, b));
+      if (!items.length) {
+        el.trainingList.innerHTML = '<div class="empty">Noch keine Trainings erfasst.</div>';
+        return;
+      }
+      el.trainingList.innerHTML = items.map(item => {
+        const amountText = Number(item.amount || 1) === 1 ? '1 Training' : Number(item.amount || 1) + ' Trainings';
+        const note = escapeHtml(item.note || 'Keine Notiz');
+        return `
+          <article class="item">
+            <div>
+              <p class="item-title">${formatDate(item.date)}</p>
+              <p class="item-meta">${note}</p>
+              <span class="pill good">${amountText}</span>
+            </div>
+            <button class="small-btn" type="button" data-delete-training="${item.id}">Löschen</button>
+          </article>
+        `;
+      }).join('');
+      el.trainingList.querySelectorAll('[data-delete-training]').forEach(button => {
+        button.addEventListener('click', () => {
+          state.trainings = state.trainings.filter(item => item.id !== button.dataset.deleteTraining);
+          saveAndRender('Training gelöscht.');
+        });
+      });
+    }
+
+    function renderRedeemList() {
+      const items = [...state.redemptions].sort((a, b) => sortByDateDesc(a, b));
+      if (!items.length) {
+        el.redeemList.innerHTML = '<div class="empty">Noch kein Privattraining eingelöst.</div>';
+        return;
+      }
+      el.redeemList.innerHTML = items.map(item => {
+        const note = escapeHtml(item.note || 'Keine Notiz');
+        return `
+          <article class="item">
+            <div>
+              <p class="item-title">${formatDate(item.date)}</p>
+              <p class="item-meta">${note}</p>
+              <span class="pill redeemed">Eingelöst</span>
+            </div>
+            <button class="small-btn" type="button" data-delete-redeem="${item.id}">Löschen</button>
+          </article>
+        `;
+      }).join('');
+      el.redeemList.querySelectorAll('[data-delete-redeem]').forEach(button => {
+        button.addEventListener('click', () => {
+          state.redemptions = state.redemptions.filter(item => item.id !== button.dataset.deleteRedeem);
+          saveAndRender('Einlösung gelöscht.');
+        });
+      });
+    }
+
+    function saveAndRender(message) {
+      saveState();
+      render();
+      if (message) showToast(message);
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        return {
+          trainings: Array.isArray(parsed.trainings) ? parsed.trainings : [],
+          redemptions: Array.isArray(parsed.redemptions) ? parsed.redemptions : []
+        };
+      } catch (error) {
+        console.error(error);
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function defaultState() {
+      return { trainings: [], redemptions: [] };
+    }
+
+    function exportBackup() {
+      const data = {
+        app: 'Training Tracker',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        trainings: state.trainings,
+        redemptions: state.redemptions
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'training-tracker-backup-' + todayISO() + '.json';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast('Backup exportiert. Speichere es z.B. in iCloud Drive.');
+    }
+
+    function importBackup(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || '{}'));
+          if (!Array.isArray(parsed.trainings) || !Array.isArray(parsed.redemptions)) {
+            throw new Error('Ungültiges Backup');
+          }
+          const ok = confirm('Backup importieren? Deine aktuellen Daten werden ersetzt.');
+          if (!ok) return;
+          state.trainings = parsed.trainings;
+          state.redemptions = parsed.redemptions;
+          saveAndRender('Backup importiert.');
+        } catch (error) {
+          console.error(error);
+          showToast('Backup konnte nicht importiert werden.');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function todayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset();
+      const local = new Date(now.getTime() - offset * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function formatDate(value) {
+      if (!value) return 'Ohne Datum';
+      const [year, month, day] = value.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      return new Intl.DateTimeFormat('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
+    }
+
+    function sortByDateDesc(a, b) {
+      const d = String(b.date || '').localeCompare(String(a.date || ''));
+      if (d !== 0) return d;
+      return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function cryptoId() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return 'id-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      clearTimeout(toastTimer);
+      el.toast.textContent = message;
+      el.toast.classList.add('show');
+      toastTimer = setTimeout(() => el.toast.classList.remove('show'), 2600);
+    }
+
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+      }
+    }
+  </script>
+</body>
+</html>
